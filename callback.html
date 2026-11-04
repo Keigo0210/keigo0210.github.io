@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer"><title>GSync sign-in</title>
+<style>:root{color-scheme:light dark;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}body{margin:0;min-height:100vh;display:grid;place-items:center;text-align:center}main{max-width:29rem;padding:2rem}a.button{display:inline-block;background:#7551c1;color:white;text-decoration:none;padding:1rem 1.3rem;border-radius:.5rem}.hidden{display:none}</style>
+</head><body><main><h1 id="title">Returning to Obsidian…</h1><p id="msg">If Obsidian doesn't open, tap below.</p><a id="open" class="button" href="#">Open Obsidian</a>
+<p><small>This page passes Google's one-time authorization code to GSync on your device and stores nothing.</small></p></main>
+<script>
+/* Derived from dg0988/ObsidianGSync docs/callback.html (MIT License). */
+(function(){
+  var q=new URLSearchParams(window.location.search), code=q.get('code'), state=q.get('state')||'', error=q.get('error');
+  var title=document.getElementById('title'),msg=document.getElementById('msg'),btn=document.getElementById('open');
+  if(!code&&!error){title.textContent='GSync sign-in';msg.textContent='Start sign-in from the GSync settings in Obsidian.';btn.classList.add('hidden');return;}
+  var vault='',i=state.indexOf('~');
+  if(i>=0){try{var b=state.slice(i+1).replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';var bin=atob(b),bytes=new Uint8Array(bin.length);for(var k=0;k<bin.length;k++)bytes[k]=bin.charCodeAt(k);vault=new TextDecoder().decode(bytes);}catch(e){vault='';}}
+  var parts=[];if(vault)parts.push('vault='+encodeURIComponent(vault));if(code)parts.push('code='+encodeURIComponent(code));if(state)parts.push('state='+encodeURIComponent(state));if(error)parts.push('error='+encodeURIComponent(error));
+  var url='obsidian://gsync-auth?'+parts.join('&');btn.href=url;
+  if(error){title.textContent='Sign-in was cancelled';msg.textContent='Google returned: '+error+'. Return to Obsidian and try again.';}
+  try{history.replaceState(null,'',window.location.pathname);}catch(e){}
+  setTimeout(function(){window.location.href=url;},300);
+})();
+</script></body></html>
